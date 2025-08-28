@@ -15,7 +15,8 @@ class Pid(Node):
         self.prev_time = self.get_clock().now()
         self.prev_err = [0.0, 0.0]   
         self.integral = [0.0, 0.0] 
-        self.radius = 5.0
+        self.radius = 0.5
+        self.l= 2.0  # distance between wheels
 
         self.v = [0.0, 0.0]   
         self.rpm = [0.0, 0.0]
@@ -26,8 +27,8 @@ class Pid(Node):
         self.publisher = self.create_publisher(Float32MultiArray, 'Thr', 10)
         
     def cmd_callback(self, msg):
-        self.v[0] = (msg.data[0]) / (2 * math.pi * self.radius) * 60 # required rpms
-        self.v[1] = (msg.data[1]) / (2 * math.pi * self.radius) * 60 
+        self.v[0] = (msg.data[0]-self.l/2*msg.data[1])*60 / (2 * math.pi * self.radius)  # required rpms for left   msg.data[0]--velocity   msg.data[1]--angular velocity
+        self.v[1] = (msg.data[0]+self.l/2*msg.data[1])*60 / (2 * math.pi * self.radius)  # for right
     
     def rpm_callback(self, msg):
         self.rpm = msg.data
@@ -63,6 +64,9 @@ def main(args=None):
     rclpy.spin(node)
     node.destroy_node()
     rclpy.shutdown()
+
+if __name__== '__main__':
+    main()
 
 if __name__== '__main__':
     main()
